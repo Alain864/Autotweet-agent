@@ -1,0 +1,103 @@
+{
+  "name": "Daily Popular Tweet Test",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "daily-trigger",
+      "name": "Daily Trigger (9AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const hooks = [\n  'Tiny systems beat huge plans.',\n  'Ship daily, improve weekly.',\n  'Automate the boring parts first.',\n  'Consistency compounds faster than motivation.'\n];\n\nconst hashtags = ['#buildinpublic', '#AI', '#automation', '#n8n'];\nconst pick = (arr) => arr[Math.floor(Math.random() * arr.length)];\n\nconst tweet = `${pick(hooks)} ${pick(hashtags)} ${pick(hashtags)}`;\n\nreturn [{\n  tweet,\n  length: tweet.length,\n  createdAt: new Date().toISOString()\n}];"
+      },
+      "id": "create-tweet",
+      "name": "Create Tweet Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "text": "={{$json.tweet}}"
+      },
+      "id": "post-x",
+      "name": "Post to X",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        810,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Tweet Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Trigger (9AM)": {
+      "main": [
+        [
+          {
+            "node": "Create Tweet Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Tweet Text": {
+      "main": [
+        [
+          {
+            "node": "Post to X",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d9e0b2b8-5f68-4a02-9f71-8d06018e5a56"
+}

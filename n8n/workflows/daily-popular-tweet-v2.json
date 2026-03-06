@@ -1,0 +1,179 @@
+{
+  "name": "Daily Popular Tweet Test v2",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger-v2",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "daily-trigger-v2",
+      "name": "Daily Trigger (9AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const hooks = [\n  'Tiny systems beat huge plans.',\n  'Ship daily, improve weekly.',\n  'Automate the boring parts first.',\n  'Consistency compounds faster than motivation.'\n];\n\nconst hashtags = ['#buildinpublic', '#AI', '#automation', '#n8n'];\nconst pick = (arr) => arr[Math.floor(Math.random() * arr.length)];\n\nconst tweet = `${pick(hooks)} ${pick(hashtags)} ${pick(hashtags)}`;\n\nreturn [{\n  tweet,\n  createdAt: new Date().toISOString()\n}];"
+      },
+      "id": "create-tweet-v2",
+      "name": "Create Tweet Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        210
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const bannedWords = ['scam', 'nsfw', 'slur'];\nconst maxLength = 270;\n\nlet tweet = String($json.tweet || '').replace(/\\s+/g, ' ').trim();\n\nif (tweet.length > maxLength) {\n  tweet = `${tweet.slice(0, maxLength - 1).trimEnd()}…`;\n}\n\nconst lowered = tweet.toLowerCase();\nconst bannedWord = bannedWords.find((word) => lowered.includes(word));\n\nlet duplicateDetected = false;\n\ntry {\n  const globalData = $getWorkflowStaticData('global');\n  if (globalData.lastTweet === tweet) {\n    duplicateDetected = true;\n    tweet = `${tweet} #DailyBuild`;\n    if (tweet.length > 280) {\n      tweet = `${tweet.slice(0, 279)}…`;\n    }\n  }\n\n  if (!bannedWord && tweet) {\n    globalData.lastTweet = tweet;\n  }\n} catch (error) {\n  // If static data isn't available, continue without duplicate memory.\n}\n\nconst shouldPost = Boolean(tweet) && !bannedWord;\n\nreturn [{\n  tweet,\n  length: tweet.length,\n  createdAt: new Date().toISOString(),\n  shouldPost,\n  duplicateDetected,\n  skipReason: shouldPost ? '' : `Blocked by guardrails (${bannedWord ? `contains ${bannedWord}` : 'empty tweet'})`\n}];"
+      },
+      "id": "guardrails-v2",
+      "name": "Apply Guardrails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        210
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.shouldPost}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      },
+      "id": "if-should-post-v2",
+      "name": "Should Post?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1010,
+        210
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "text": "={{$json.tweet}}"
+      },
+      "id": "post-x-v2",
+      "name": "Post to X",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        130
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  posted: false,\n  reason: $json.skipReason || 'Unknown guardrail failure',\n  createdAt: new Date().toISOString()\n}];"
+      },
+      "id": "skip-log-v2",
+      "name": "Skip Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Tweet Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Trigger (9AM)": {
+      "main": [
+        [
+          {
+            "node": "Create Tweet Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Tweet Text": {
+      "main": [
+        [
+          {
+            "node": "Apply Guardrails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Guardrails": {
+      "main": [
+        [
+          {
+            "node": "Should Post?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Post?": {
+      "main": [
+        [
+          {
+            "node": "Post to X",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "74b8464d-f2fc-4c72-bfd4-4a87541ae8ef"
+}

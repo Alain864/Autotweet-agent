@@ -1,0 +1,106 @@
+# Python basics
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Jupyter / Notebooks
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+*.ipynb
+*-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].ipynb   # timestamped notebooks
+
+# Data, models, large files
+data/
+dataset/
+datasets/
+*.csv
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.pth
+*.pt
+*.safetensors
+*.bin
+*.onnx
+*.mlmodel
+*.pickle
+*.pkl
+*.joblib
+models/
+checkpoints/
+weights/
+*.weights/
+*.ckpt
+*.weights
+
+# Logs & caches
+*.log
+logs/
+cache/
+__pycache__/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+*.env
+credentials.json
+service-account.json
+*.key
+*.pem
+*.secret*
+
+# IDE / Editors
+.idea/
+.vscode/
+*.sublime-*
+*.swp
+*.swo
+*~
+
+# OS generated
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Dependency management
+poetry.lock      # ← keep only if you want reproducible builds
+Pipfile.lock     # ← same logic
+
+# Build & distribution
+build/
+dist/
+*.egg
+*.egg-info/
+*.eggs/
+MANIFEST
+
+# LLM / agent frameworks specific
+.chainlit/
+langflow/
+flowise/
+n8n/data/
+crewai_storage/
+autogen/
+mem0/
+chroma/
+qdrant/
+weaviate/
+.milvus/
