@@ -23,7 +23,7 @@ autotweet-agent/
 
 ## What you run
 
-1. Start n8n:
+1. Start stack (n8n + worker + Postgres + Redis):
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d --build
@@ -55,5 +55,11 @@ docker compose -f docker/docker-compose.yml up -d --build
 
 - `N8N_BASIC_AUTH_USER=admin`
 - `N8N_BASIC_AUTH_PASSWORD=change-me`
+
+It also defaults Postgres credentials for local testing:
+
+- `POSTGRES_DB=n8n`
+- `POSTGRES_USER=n8n`
+- `POSTGRES_PASSWORD=n8n`
 
 Set stronger values in your shell or an env file before running in real environments.
